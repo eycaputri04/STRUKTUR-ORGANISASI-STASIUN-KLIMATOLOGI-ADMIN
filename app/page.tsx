@@ -1,10 +1,17 @@
 'use client';
 
 import React, { useState } from 'react';
+<<<<<<< HEAD
 import Image from 'next/image';
 import InputField from '@/components/Input';
 import Button from '@/components/Button';
 import Logo from '@/public/logo.png';
+=======
+import Link from 'next/link';
+import InputField from '@/components/Input';
+import Button from '@/components/Button';
+import AuthLeftPanel from '@/components/AuthLeftPanel';
+>>>>>>> bhinnekadev24/bhi-314-frontend-daftar-admin
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -18,6 +25,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen">
+<<<<<<< HEAD
       {/* Kiri: Panel Logo & Judul */}
       <div className="bg-[#004AAD] text-white flex flex-col justify-center items-center w-full md:w-1/2 p-8">
         <h1 className="text-xl sm:text-2xl font-bold text-center mb-4">
@@ -41,6 +49,12 @@ export default function LoginPage() {
       {/* Kanan: Form Login */}
       <div className="flex flex-col justify-center items-center w-full md:w-1/2 p-8">
         <h1 className="text-2xl font-bold mb-6">Login Admin</h1>
+=======
+      <AuthLeftPanel />
+
+      <div className="flex flex-col justify-center items-center w-full md:w-1/2 p-8">
+        <h1 className="text-2xl font-bold mb-6">Login Admin</h1><br />
+>>>>>>> bhinnekadev24/bhi-314-frontend-daftar-admin
         <div className="w-full max-w-sm flex flex-col gap-4">
           <InputField
             name="email"
@@ -68,9 +82,18 @@ export default function LoginPage() {
 
           <div className="text-sm text-center">
             Belum punya akun?{' '}
+<<<<<<< HEAD
             <span className="text-blue-700 font-medium hover:underline cursor-pointer">
               Buat akun
             </span>
+=======
+            <Link
+              href="/daftar"
+              className="text-blue-700 font-medium hover:underline"
+            >
+              Buat akun
+            </Link>
+>>>>>>> bhinnekadev24/bhi-314-frontend-daftar-admin
           </div>
         </div>
       </div>

@@ -1,12 +1,21 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
+<<<<<<< HEAD
 import { inputProps } from '@/interface/inputProps';
+=======
+import { inputProps } from '@/interface/InputProps';
+>>>>>>> bhinnekadev24/bhi-314-frontend-daftar-admin
 
 export default function InputField({
   label,
   name,
+<<<<<<< HEAD
   type,
   placeholder,
+=======
+  type = 'text',
+  placeholder = '',
+>>>>>>> bhinnekadev24/bhi-314-frontend-daftar-admin
   value,
   onChange,
 }: inputProps) {

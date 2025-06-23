@@ -1,7 +1,13 @@
 import React from 'react';
+<<<<<<< HEAD
 import { ButtonProps } from '@/interface/buttonProps';
 
 export default function Button({ label, styleButton = '', disabled = false, onClick }: ButtonProps) {
+=======
+import { ButtonProps } from '@/interface/ButtonProps';
+
+export default function Button({ label, styleButton, disabled, onClick }: ButtonProps) {
+>>>>>>> bhinnekadev24/bhi-314-frontend-daftar-admin
   return (
     <button
       type="button"
