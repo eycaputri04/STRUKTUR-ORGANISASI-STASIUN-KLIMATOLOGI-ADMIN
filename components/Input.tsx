@@ -5,8 +5,8 @@ import { inputProps } from '@/interface/InputProps';
 export default function InputField({
   label,
   name,
-  type = 'text',
-  placeholder = '',
+  type,
+  placeholder  ,
   value,
   onChange,
 }: inputProps) {

@@ -96,7 +96,7 @@ export default function RegisterPage() {
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
           <InputField
-            name="accessLevel"
+            name="accessLevel"  
             type="text"
             placeholder="Masukkan level akses"
             value={accessLevel}
