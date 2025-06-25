@@ -2,26 +2,47 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import InputField from '@/components/Input';
 import Button from '@/components/Button';
 import AuthLeftPanel from '@/components/AuthLeftPanel';
+import { motion } from 'framer-motion'; // 💡 Transisi halus (install framer-motion)
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const router = useRouter();
 
   const handleLogin = () => {
+    if (!email || !password) {
+      setError('Email dan password wajib diisi.');
+      return;
+    }
+
+    setError('');
     console.log('Email:', email);
     console.log('Password:', password);
-    // tambahkan logika autentikasi di sini
+
+    // Simulasi login & redirect
+    setTimeout(() => {
+      router.push('/beranda');
+    }, 500);
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-gradient-to-br from-white via-blue-50 to-blue-100 transition-all">
       <AuthLeftPanel />
 
-      <div className="flex flex-col justify-center items-center w-full md:w-1/2 p-8">
-        <h1 className="text-2xl font-bold mb-6">Login Admin</h1><br />
+      <motion.div
+        initial={{ opacity: 0, x: 30 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
+        className="flex flex-col justify-center items-center w-full md:w-1/2 p-8"
+      >
+        <h1 className="text-3xl font-bold mb-2 text-gray-800 tracking-wide">Login Admin</h1>
+        <p className="text-gray-500 mb-6 text-sm">Silakan masuk untuk mengelola sistem</p>
+
         <div className="w-full max-w-sm flex flex-col gap-4">
           <InputField
             name="email"
@@ -38,16 +59,17 @@ export default function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
           />
 
+          {error && (
+            <p className="text-sm text-red-500 -mt-2">{error}</p>
+          )}
+
           <div className="text-right text-sm text-blue-700 hover:underline cursor-pointer">
-            Lupa Kata Sandi?
+            <Link href="/lupa-password">Lupa Kata Sandi?</Link>
           </div>
 
-          <Button
-            label="Masuk"
-            onClick={handleLogin}
-          />
+          <Button label="Masuk" onClick={handleLogin} />
 
-          <div className="text-sm text-center">
+          <div className="text-sm text-center text-gray-600">
             Belum punya akun?{' '}
             <Link
               href="/daftar"
@@ -57,7 +79,7 @@ export default function LoginPage() {
             </Link>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

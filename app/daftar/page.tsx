@@ -6,6 +6,7 @@ import InputField from '@/components/Input';
 import Button from '@/components/Button';
 import AuthLeftPanel from '@/components/AuthLeftPanel';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 
 export default function RegisterPage() {
   const [firstName, setFirstName] = useState('');
@@ -19,24 +20,19 @@ export default function RegisterPage() {
   const router = useRouter();
 
   const handleRegister = () => {
-    // Validasi sederhana
     if (!firstName || !lastName || !email || !phone || !password || !confirmPassword || !accessLevel) {
       setError('Semua field harus diisi!');
       return;
     }
+
     if (password !== confirmPassword) {
       setError('Konfirmasi kata sandi tidak sesuai!');
       return;
     }
 
-    // Simulasi sukses
+    // Simulasi register
     console.log('Register sukses:', {
-      firstName,
-      lastName,
-      email,
-      phone,
-      password,
-      accessLevel,
+      firstName, lastName, email, phone, password, accessLevel
     });
 
     setError('');
@@ -44,25 +40,31 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-gradient-to-br from-white via-blue-50 to-blue-100">
       <AuthLeftPanel />
 
-      <div className="flex flex-col justify-center items-center w-full md:w-1/2 p-8">
-        <h1 className="text-2xl font-bold mb-6">Daftar Admin</h1>
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="flex flex-col justify-center items-center w-full md:w-1/2 p-8"
+      >
+        <h1 className="text-2xl font-bold mb-2 text-gray-800 tracking-wide">Daftar Admin</h1>
+        <p className="text-gray-500 mb-6 text-sm">Silakan isi data berikut untuk membuat akun</p>
+
         <div className="w-full max-w-sm flex flex-col gap-4">
-          {/* Nama depan & belakang di satu baris */}
           <div className="flex gap-2">
             <InputField
               name="firstName"
               type="text"
-              placeholder="Masukkan Nama Depan"
+              placeholder="Nama Depan"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
             />
             <InputField
               name="lastName"
               type="text"
-              placeholder="Masukkan Nama Belakang"
+              placeholder="Nama Belakang"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
             />
@@ -70,21 +72,21 @@ export default function RegisterPage() {
           <InputField
             name="email"
             type="email"
-            placeholder="Masukkan Email"
+            placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
           <InputField
             name="phone"
             type="text"
-            placeholder="Masukkan No Telepon"
+            placeholder="No Telepon"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
           />
           <InputField
             name="password"
             type="password"
-            placeholder="Masukkan Kata Sandi"
+            placeholder="Kata Sandi"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
@@ -95,13 +97,15 @@ export default function RegisterPage() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
-          <InputField
-            name="accessLevel"  
-            type="text"
-            placeholder="Masukkan level akses"
+          <select
             value={accessLevel}
             onChange={(e) => setAccessLevel(e.target.value)}
-          />
+            className="border border-gray-300 rounded px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Pilih Level Akses</option>
+            <option value="admin">Admin</option>
+            <option value="superadmin">Super Admin</option>
+          </select>
 
           {error && (
             <div className="bg-red-100 text-red-700 text-sm p-2 rounded">
@@ -109,19 +113,16 @@ export default function RegisterPage() {
             </div>
           )}
 
-          <Button
-            label="Daftar"
-            onClick={handleRegister}
-          />
+          <Button label="Daftar" onClick={handleRegister} />
 
-          <div className="text-sm text-center">
+          <div className="text-sm text-center text-gray-600">
             Sudah punya akun?{' '}
             <Link href="/" className="text-blue-700 font-medium hover:underline">
               Masuk
             </Link>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
