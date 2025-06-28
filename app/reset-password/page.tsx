@@ -5,11 +5,14 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import InputField from '@/components/Input';
 import Button from '@/components/Button';
 import AuthLeftPanel from '@/components/AuthLeftPanel';
+import Image from 'next/image';
+import SuccessImage from '@/public//password-success.png';
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
 
   const params = useSearchParams();
   const token = params.get('token');
@@ -23,15 +26,24 @@ export default function ResetPasswordPage() {
   }, [token]);
 
   const handleReset = () => {
-    if (password !== confirm) {
-      alert('Kata sandi tidak cocok!');
+    if (!password || !confirm) {
+      setError('Semua field wajib diisi.');
       return;
     }
 
+    if (password.length < 8) {
+      setError('Password minimal 8 karakter.');
+      return;
+    }
+
+    if (password !== confirm) {
+      setError('Kata sandi tidak cocok!');
+      return;
+    }
+
+    setError('');
     console.log(`Reset password dengan token: ${token}, password baru: ${password}`);
-    setTimeout(() => {
-      setSuccess(true);
-    }, 1000);
+    setTimeout(() => setSuccess(true), 1000);
   };
 
   return (
@@ -39,18 +51,17 @@ export default function ResetPasswordPage() {
       <AuthLeftPanel />
 
       <div className="flex flex-col justify-center items-center w-full md:w-1/2 p-8">
-        <h1 className="text-2xl font-bold mb-6">Atur Ulang Kata Sandi</h1>
         <div className="w-full max-w-sm flex flex-col gap-4 text-center">
+          <h1 className="text-2xl font-bold mb-4 text-gray-800">Atur Ulang Kata Sandi</h1>
+
           {success ? (
-            <p className="text-gray-700">
-              Kata sandi berhasil diubah.{' '}
-              <span
-                onClick={() => router.push('/')}
-                className="underline cursor-pointer text-blue-700 hover:text-blue-900"
-              >
-                Login sekarang
-              </span>
-            </p>
+            <>
+              <Image src={SuccessImage} alt="Success" width={150} height={150} />
+              <p className="text-gray-700">
+                Kata sandi berhasil diubah.
+              </p>
+              <Button label="Login sekarang" onClick={() => router.push('/')} />
+            </>
           ) : (
             <>
               <InputField
@@ -67,10 +78,21 @@ export default function ResetPasswordPage() {
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
               />
+              {error && <p className="text-sm text-red-500 -mt-2">{error}</p>}
+
               <Button
                 label="Simpan Password Baru"
                 onClick={handleReset}
               />
+              <p className="text-xs text-gray-400 mt-2">
+                Kembali ke{' '}
+                <span
+                  className="text-blue-700 underline cursor-pointer hover:text-blue-900"
+                  onClick={() => router.push('/')}
+                >
+                  halaman login
+                </span>
+              </p>
             </>
           )}
         </div>
