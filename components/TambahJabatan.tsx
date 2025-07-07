@@ -1,37 +1,66 @@
 'use client';
 
 import React, { useState, ChangeEvent, FormEvent } from 'react';
-import Button from './Button';
+import { v4 as uuidv4 } from 'uuid';
+import { toast } from 'react-toastify';
 import InputField from './Input';
+import Button from './Button';
+import { tambahJabatan } from '@/lib/api/jabatan/post-jabatan/router';
 
 interface TambahJabatanProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
 interface FormData {
-  id: string;
   namaJabatan: string;
 }
 
 const initialFormState: FormData = {
-  id: '',
   namaJabatan: '',
 };
 
-export const TambahJabatan: React.FC<TambahJabatanProps> = ({ isOpen, onClose }) => {
+export const TambahJabatan: React.FC<TambahJabatanProps> = ({
+  isOpen,
+  onClose,
+  onSuccess,
+}) => {
   const [formData, setFormData] = useState<FormData>(initialFormState);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    console.log('Jabatan ditambahkan:', formData);
-    setFormData(initialFormState);
-    onClose();
+
+    const namaTrimmed = formData.namaJabatan.trim();
+    if (!namaTrimmed) {
+      toast.error('Nama jabatan tidak boleh kosong');
+      return;
+    }
+
+    const dataToSend = {
+      ID_Jabatan: uuidv4(),
+      Nama_Jabatan: namaTrimmed,
+    };
+
+    setLoading(true);
+
+    try {
+      await tambahJabatan(dataToSend);
+      toast.success('Jabatan berhasil ditambahkan');
+      setFormData(initialFormState);
+      onSuccess?.(); // panggil ini dulu
+      onClose();     // tutup modal setelah sukses
+    } catch (error) {
+      toast.error((error as Error).message || 'Gagal menambahkan jabatan');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -41,23 +70,16 @@ export const TambahJabatan: React.FC<TambahJabatanProps> = ({ isOpen, onClose })
       <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md">
         <h2 className="text-lg font-semibold mb-4">Tambah Jabatan</h2>
         <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4" autoComplete="off">
-          {[ 
-            { name: 'id', label: 'ID Jabatan', placeholder: 'Masukkan ID' },
-            { name: 'namaJabatan', label: 'Nama Jabatan', placeholder: 'Masukkan nama jabatan' },
-          ].map((field) => (
-            <div key={field.name} className="flex flex-col gap-1">
-              <label htmlFor={field.name} className="text-sm font-medium text-gray-700">
-                {field.label}
-              </label>
-              <InputField
-                type="text"
-                name={field.name}
-                value={(formData as any)[field.name]}
-                onChange={handleChange}
-                placeholder={field.placeholder}
-              />
-            </div>
-          ))}
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">Nama Jabatan</label>
+            <InputField
+              type="text"
+              name="namaJabatan"
+              value={formData.namaJabatan}
+              onChange={handleChange}
+              placeholder="Masukkan nama jabatan"
+            />
+          </div>
 
           <div className="flex justify-end gap-2 mt-4">
             <Button
@@ -67,9 +89,10 @@ export const TambahJabatan: React.FC<TambahJabatanProps> = ({ isOpen, onClose })
               type="button"
             />
             <Button
-              label="SIMPAN"
+              label={loading ? "Menyimpan..." : "SIMPAN"}
               type="submit"
               styleButton="bg-blue-800 text-white hover:bg-blue-900"
+              disabled={loading}
             />
           </div>
         </form>

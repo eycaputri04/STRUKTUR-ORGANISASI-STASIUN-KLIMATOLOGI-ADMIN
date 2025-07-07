@@ -57,7 +57,11 @@ export default function EditProfilPage() {
             <label className="block text-sm font-medium text-gray-700 mb-1">Foto Profil</label>
             {fotoPreview ? (
               <div className="flex items-center gap-4">
-                <img src={fotoPreview} alt="Preview" className="w-20 h-20 rounded-full object-cover" />
+                {/*<img 
+                  src={fotoPreview} 
+                  alt="Preview" 
+                  className="w-20 h-20 rounded-full object-cover" 
+                  />*/}
                 <button
                   onClick={() => {
                     setFoto(null);

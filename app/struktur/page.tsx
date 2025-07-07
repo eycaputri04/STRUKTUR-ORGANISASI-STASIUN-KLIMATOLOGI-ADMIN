@@ -1,32 +1,66 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
 import { MdOutlineSearch } from 'react-icons/md';
 import Sidebar from '@/components/Sidebar';
 import Navbar from '@/components/Navbar';
 import { TambahStruktur } from '@/components/TambahStruktur';
 import { EditStruktur } from '@/components/EditStruktur';
+import { getAllStruktur } from '@/lib/api/struktur/get-struktur/router';
+import { deleteStrukturOrganisasi } from '@/lib/api/struktur/delete-struktur/router';
+import { toast } from 'react-toastify';
 
 interface Struktur {
-  id: string;
-  petugas: string; // bisa NIP
-  periode: string;
+  ID_Struktur: string;
+  Petugas: string;
+  Periode: string;
+  PetugasDetail?: {
+    Nama_Depan_Petugas: string;
+    Nama_Belakang_Petugas: string;
+  };
 }
 
 export default function StrukturPage() {
-  const [strukturList, setStrukturList] = useState<Struktur[]>([
-    { id: 'S01', petugas: '1987654321', periode: '2024–2026' },
-    { id: 'S02', petugas: '1976543210', periode: '2023–2025' },
-  ]);
-
+  const [strukturList, setStrukturList] = useState<Struktur[]>([]);
   const [isTambahOpen, setIsTambahOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [selectedStruktur, setSelectedStruktur] = useState<Struktur | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const handleDelete = (id: string) => {
-    if (confirm('Yakin ingin menghapus data struktur ini?')) {
-      setStrukturList(prev => prev.filter(s => s.id !== id));
+  const fetchStruktur = useCallback(async () => {
+    try {
+      const data = await getAllStruktur();
+      setStrukturList(data);
+    } catch (error) {
+      toast.error((error as Error).message);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchStruktur();
+  }, [fetchStruktur]);
+
+  const handleDelete = async (struktur: Struktur) => {
+    const fullName = struktur.PetugasDetail
+      ? `${struktur.PetugasDetail.Nama_Depan_Petugas} ${struktur.PetugasDetail.Nama_Belakang_Petugas}`
+      : struktur.Petugas;
+
+    const confirmDelete = confirm(`Yakin ingin menghapus struktur milik ${fullName}?`);
+    if (!confirmDelete) return;
+
+    try {
+      setDeletingId(struktur.ID_Struktur);
+      await deleteStrukturOrganisasi(struktur.ID_Struktur);
+      toast.success('Struktur berhasil dihapus');
+      await fetchStruktur();
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error('Detail error:', error.message);
+      }
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -35,12 +69,13 @@ export default function StrukturPage() {
     setIsEditOpen(true);
   };
 
-  const handleEditSubmit = (updated: Struktur) => {
-    setStrukturList(prev =>
-      prev.map(s => (s.id === updated.id ? updated : s))
-    );
-    setIsEditOpen(false);
-  };
+  const filteredStruktur = strukturList.filter((s) =>
+    s.PetugasDetail
+      ? `${s.PetugasDetail.Nama_Depan_Petugas} ${s.PetugasDetail.Nama_Belakang_Petugas}`
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      : s.Petugas.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -56,19 +91,33 @@ export default function StrukturPage() {
             <FaPlus /> Tambah
           </button>
 
-          <TambahStruktur isOpen={isTambahOpen} onClose={() => setIsTambahOpen(false)} />
+          <TambahStruktur
+            isOpen={isTambahOpen}
+            onClose={() => setIsTambahOpen(false)}
+            onSuccess={fetchStruktur}
+          />
 
           <EditStruktur
             isOpen={isEditOpen}
             onClose={() => setIsEditOpen(false)}
-            struktur={selectedStruktur}
-            onSubmit={handleEditSubmit}
+            struktur={
+              selectedStruktur
+                ? {
+                    id: selectedStruktur.ID_Struktur,
+                    petugas: selectedStruktur.Petugas,
+                    periode: selectedStruktur.Periode,
+                  }
+                : null
+            }
+            onSuccess={fetchStruktur}
           />
 
           <div className="relative w-full md:w-64 mt-4 md:mt-0">
             <input
               type="text"
               placeholder="Cari"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full border border-blue-800 rounded-full px-4 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-800 text-sm"
             />
             <MdOutlineSearch className="absolute top-2.5 left-3 text-blue-800 text-lg" />
@@ -80,17 +129,21 @@ export default function StrukturPage() {
             <thead className="bg-blue-800 text-white">
               <tr>
                 <th className="px-4 py-3 rounded-tl-xl rounded-bl-xl">ID Struktur</th>
-                <th className="px-4 py-3">Petugas (NIP)</th>
+                <th className="px-4 py-3">Petugas</th>
                 <th className="px-4 py-3">Periode</th>
                 <th className="px-4 py-3 text-center rounded-tr-xl rounded-br-xl">Aksi</th>
               </tr>
             </thead>
             <tbody className="bg-white">
-              {strukturList.map((struktur, index) => (
+              {filteredStruktur.map((struktur, index) => (
                 <tr key={index} className="border-b border-white">
-                  <td className="px-4 py-3">{struktur.id}</td>
-                  <td className="px-4 py-3">{struktur.petugas}</td>
-                  <td className="px-4 py-3">{struktur.periode}</td>
+                  <td className="px-4 py-3">{struktur.ID_Struktur}</td>
+                  <td className="px-4 py-3">
+                    {struktur.PetugasDetail
+                      ? `${struktur.PetugasDetail.Nama_Depan_Petugas} ${struktur.PetugasDetail.Nama_Belakang_Petugas}`
+                      : struktur.Petugas}
+                  </td>
+                  <td className="px-4 py-3">{struktur.Periode}</td>
                   <td className="px-4 py-3 text-center">
                     <div className="flex justify-center gap-3">
                       <FaEdit
@@ -98,13 +151,24 @@ export default function StrukturPage() {
                         onClick={() => handleEditClick(struktur)}
                       />
                       <FaTrash
-                        className="text-blue-800 cursor-pointer"
-                        onClick={() => handleDelete(struktur.id)}
+                        className={`cursor-pointer ${
+                          deletingId === struktur.ID_Struktur ? 'opacity-50 cursor-not-allowed' : 'text-blue-800'
+                        }`}
+                        onClick={() =>
+                          deletingId === struktur.ID_Struktur ? null : handleDelete(struktur)
+                        }
                       />
                     </div>
                   </td>
                 </tr>
               ))}
+              {filteredStruktur.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="text-center py-6 text-gray-500">
+                    Tidak ada data struktur ditemukan.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

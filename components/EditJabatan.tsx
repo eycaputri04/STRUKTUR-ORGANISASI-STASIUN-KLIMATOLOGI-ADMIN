@@ -3,37 +3,59 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import Button from './Button';
 import InputField from './Input';
+import { updateJabatan } from '@/lib/api/jabatan/put-jabatan/router';
+import { toast } from 'react-toastify';
 
 interface EditJabatanProps {
   isOpen: boolean;
   onClose: () => void;
   jabatan: { id: string; nama: string } | null;
-  onSubmit: (data: { id: string; nama: string }) => void
+  onSuccess?: () => void;
 }
-
 
 export const EditJabatan: React.FC<EditJabatanProps> = ({
   isOpen,
   onClose,
   jabatan,
-  onSubmit,
+  onSuccess,
 }) => {
   const [formData, setFormData] = useState({ id: '', nama: '' });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (jabatan) {
-      setFormData({ id: jabatan.id, nama: jabatan.nama });
+      setFormData({
+        id: jabatan.id,
+        nama: jabatan.nama?.trim() ?? '',
+      });
     }
   }, [jabatan]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    onSubmit({ id: formData.id, nama: formData.nama });
+    const trimmedNama = formData.nama.trim();
+
+    if (!trimmedNama) {
+      toast.error('Nama jabatan tidak boleh kosong');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await updateJabatan(formData.id, trimmedNama);
+      toast.success('Jabatan berhasil diperbarui');
+      onSuccess?.(); // reload data
+      onClose();     // tutup modal
+    } catch (error) {
+      toast.error((error as Error).message || 'Gagal memperbarui jabatan');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!isOpen || !jabatan) return null;
@@ -60,11 +82,22 @@ export const EditJabatan: React.FC<EditJabatanProps> = ({
               name="nama"
               value={formData.nama}
               onChange={handleChange}
+              placeholder="Masukkan nama jabatan"
             />
           </div>
           <div className="flex justify-end gap-2 mt-4">
-            <Button label="BATAL" type="button" onClick={onClose} styleButton="bg-gray-700 text-white hover:bg-gray-500" />
-            <Button label="SIMPAN" type="submit" styleButton="bg-blue-800 text-white hover:bg-blue-900" />
+            <Button
+              label="BATAL"
+              type="button"
+              onClick={onClose}
+              styleButton="bg-gray-700 text-white hover:bg-gray-500"
+            />
+            <Button
+              label={loading ? 'Menyimpan...' : 'SIMPAN'}
+              type="submit"
+              disabled={loading}
+              styleButton="bg-blue-800 text-white hover:bg-blue-900"
+            />
           </div>
         </form>
       </div>
