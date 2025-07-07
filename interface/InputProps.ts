@@ -1,11 +1,10 @@
-import React, { ChangeEvent } from "react";
-
 export interface inputProps {
-    label?: string; // ubah jadi opsional
-    name: string;
-    type?: string;
-    placeholder?: string;
-    value: string;
-    onChange: (e:ChangeEvent<HTMLInputElement>) => void;
-  }
-  
+  label?: string; // ✅ Tambahkan baris ini
+  name: string;
+  type?: string;
+  placeholder?: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
+  readOnly?: boolean; 
+}

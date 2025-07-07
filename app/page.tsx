@@ -1,102 +1,104 @@
 'use client';
 
 import React, { useState } from 'react';
-<<<<<<< HEAD
-import Image from 'next/image';
-import InputField from '@/components/Input';
-import Button from '@/components/Button';
-import Logo from '@/public/logo.png';
-=======
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { ToastContainer, toast } from 'react-toastify';
+import { motion } from 'framer-motion';
+import 'react-toastify/dist/ReactToastify.css';
 import InputField from '@/components/Input';
 import Button from '@/components/Button';
 import AuthLeftPanel from '@/components/AuthLeftPanel';
->>>>>>> bhinnekadev24/bhi-314-frontend-daftar-admin
+import { loginUser } from '@/lib/api/auth/auth-login/router';
 
 export default function LoginPage() {
+  const router = useRouter();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    console.log('Email:', email);
-    console.log('Password:', password);
-    // tambahkan logika autentikasi di sini
+  const handleLogin = async () => {
+    if (!email || !password) {
+      setError('Email dan password wajib diisi.');
+      return;
+    }
+
+    setError('');
+    setLoading(true);
+
+    try {
+      await loginUser(email, password);
+      toast.success('Login berhasil!');
+      router.push('/beranda');
+    } catch (err) {
+      setError((err as Error).message || 'Gagal login.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="flex min-h-screen">
-<<<<<<< HEAD
-      {/* Kiri: Panel Logo & Judul */}
-      <div className="bg-[#004AAD] text-white flex flex-col justify-center items-center w-full md:w-1/2 p-8">
-        <h1 className="text-xl sm:text-2xl font-bold text-center mb-4">
-          STRUKTUR ORGANISASI
-        </h1>
-        <h2 className="text-lg sm:text-xl font-bold text-center mb-6">
-          STASIUN KLIMATOLOGI
-        </h2>
-        <Image
-          src={Logo}
-          alt="Logo BMKG"
-          width={150}
-          height={150}
-          priority
-        />
-        <h2 className="text-md sm:text-lg font-bold text-center mt-6">
-          PROVINSI BENGKULU
-        </h2>
-      </div>
+    <>
+      <ToastContainer />
 
-      {/* Kanan: Form Login */}
-      <div className="flex flex-col justify-center items-center w-full md:w-1/2 p-8">
-        <h1 className="text-2xl font-bold mb-6">Login Admin</h1>
-=======
-      <AuthLeftPanel />
+      <div className="flex min-h-screen bg-gradient-to-br from-white via-blue-50 to-blue-100 transition-all">
+        {/* Panel Kiri */}
+        <AuthLeftPanel />
 
-      <div className="flex flex-col justify-center items-center w-full md:w-1/2 p-8">
-        <h1 className="text-2xl font-bold mb-6">Login Admin</h1><br />
->>>>>>> bhinnekadev24/bhi-314-frontend-daftar-admin
-        <div className="w-full max-w-sm flex flex-col gap-4">
-          <InputField
-            name="email"
-            type="email"
-            placeholder="Masukkan Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <InputField
-            name="password"
-            type="password"
-            placeholder="Masukkan Kata Sandi"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+        {/* Form Login */}
+        <motion.div
+          initial={{ opacity: 0, x: 30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+          className="flex flex-col justify-center items-center w-full md:w-1/2 p-8"
+        >
+          <h1 className="text-3xl font-bold mb-2 text-gray-800 tracking-wide">
+            Login Admin
+          </h1>
+          <p className="text-gray-500 mb-6 text-sm">
+            Silakan masuk untuk mengelola sistem
+          </p>
 
-          <div className="text-right text-sm text-blue-700 hover:underline cursor-pointer">
-            Lupa Kata Sandi?
+          <div className="w-full max-w-sm flex flex-col gap-4">
+            <InputField
+              name="email"
+              type="email"
+              placeholder="Masukkan Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <InputField
+              name="password"
+              type="password"
+              placeholder="Masukkan Kata Sandi"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+
+            {error && <p className="text-sm text-red-500 -mt-2">{error}</p>}
+
+            <div className="text-right text-sm text-blue-700 hover:underline">
+              <Link href="/lupa-password">Lupa Kata Sandi?</Link>
+            </div>
+
+            <Button
+              label={loading ? 'Memproses...' : 'Masuk'}
+              onClick={handleLogin}
+              disabled={loading}
+            />
+
+            {/*
+            <div className="text-sm text-center text-gray-600">
+              Belum punya akun?{' '}
+              <Link href="/daftar" className="text-blue-700 font-medium hover:underline">
+                Buat akun
+              </Link>
+            </div>*/}
           </div>
-
-          <Button
-            label="Masuk"
-            onClick={handleLogin}
-          />
-
-          <div className="text-sm text-center">
-            Belum punya akun?{' '}
-<<<<<<< HEAD
-            <span className="text-blue-700 font-medium hover:underline cursor-pointer">
-              Buat akun
-            </span>
-=======
-            <Link
-              href="/daftar"
-              className="text-blue-700 font-medium hover:underline"
-            >
-              Buat akun
-            </Link>
->>>>>>> bhinnekadev24/bhi-314-frontend-daftar-admin
-          </div>
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </>
   );
 }
