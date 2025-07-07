@@ -6,7 +6,7 @@ import InputField from "@/components/Input";
 import Button from "@/components/Button";
 import AuthLeftPanel from "@/components/AuthLeftPanel";
 import Image from "next/image";
-import EmailSentIcon from "@/public/mail-sent.svg";
+// import EmailSentIcon from "@/public/mail-sent.svg";
 import EmailIcon from "@/public/email.svg";
 
 export default function LupaPasswordPage() {
